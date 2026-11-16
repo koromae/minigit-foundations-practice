@@ -35,9 +35,9 @@ private:
 // The DEFINITIONS (normally in a .cpp file). Each starts with RepoLayout::
 // TODO: replace each body.
 
-// Hint: use a member initializer list:  : root_(root) { }
-RepoLayout::RepoLayout(const fs::path& root) {
-    (void)root;
+// The member initializer list copies the parameter into root_ before the
+// body runs. Each object gets its own copy, so two layouts never share a root.
+RepoLayout::RepoLayout(const fs::path& root) : root_(root) {
 }
 
 // Hint: return the member variable.
@@ -45,14 +45,16 @@ const fs::path& RepoLayout::root() const {
     return root_;
 }
 
-// Hint: same as HW8, but use root_ instead of a parameter.
+// Same as HW8, but the root comes from the member variable, not a parameter.
+// "const" after the () promises this function does not change the object,
+// which is why it can be called on the const objects in main.
 fs::path RepoLayout::metadataDirectory() const {
-    return {};
+    return root_ / ".minigit";
 }
 
-// Hint: reuse metadataDirectory().
+// Reuse metadataDirectory() so ".minigit" is written in only one place.
 fs::path RepoLayout::headFile() const {
-    return {};
+    return metadataDirectory() / "HEAD";
 }
 
 // ---------------------------------------------------------------------
