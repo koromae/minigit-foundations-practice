@@ -24,16 +24,33 @@ void check(bool condition, const std::string& message) {
 //     throw std::runtime_error("Cannot open file: " + file.string());
 // Hint: the reading part is the same as HW8's readTextFile.
 std::string readOrThrow(const fs::path& file) {
-    (void)file;
-    return "";   // replace this line
+    // Binary mode: return the exact bytes (no "\r\n" changes on Windows).
+    std::ifstream input(file, std::ios::binary);
+    if (!input) {
+        // throw stops this function immediately; the caller's catch runs next.
+        throw std::runtime_error("Cannot open file: " + file.string());
+    }
+
+    // Same as HW8: copy the whole buffer, so every '\n' is kept.
+    std::ostringstream contents;
+    contents << input.rdbuf();
+    if (input.bad()) {
+        throw std::runtime_error("Cannot read file: " + file.string());
+    }
+    return contents.str();
 }
 
 // TODO: call readOrThrow(file) inside a try block and return its text.
 // In the catch block, catch const std::runtime_error& error,
 // print "Sorry: " followed by error.what(), and return "".
 std::string readOrDefault(const fs::path& file) {
-    (void)file;
-    return "not written yet";   // replace this function body
+    try {
+        return readOrThrow(file);              // the normal path
+    } catch (const std::runtime_error& error) {
+        // Catch by const reference: no copy, and no slicing of the exception.
+        std::cout << "Sorry: " << error.what() << '\n';
+        return "";
+    }
 }
 
 int main() {
