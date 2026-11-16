@@ -18,8 +18,9 @@ fs::path metadataDirectory(const fs::path& root) {
 
 // TODO: return root/.minigit/index.txt. Reuse metadataDirectory(root).
 fs::path indexFile(const fs::path& root) {
-    (void)root;
-    return {};   // replace this line
+    // Reuse metadataDirectory so ".minigit" is written in only one place.
+    // No leading '/' on "index.txt": a rooted right side would replace the left.
+    return metadataDirectory(root) / "index.txt";
 }
 
 int main() {
@@ -28,7 +29,10 @@ int main() {
     check(indexFile(root).filename() == "index.txt", "file name is index.txt");
     check(indexFile(root).parent_path() == metadataDirectory(root), "index file is inside .minigit");
 
-    // TODO: add one check of your own for the root "course/team/repo".
+    // My own check: a nested root, to catch code that only works for one root.
+    const fs::path nestedRoot = "course/team/repo";
+    check(indexFile(nestedRoot) == nestedRoot / ".minigit" / "index.txt",
+          "index file for nested root course/team/repo");
 
     return failures == 0 ? 0 : 1;
 }
